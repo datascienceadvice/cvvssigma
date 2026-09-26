@@ -1,0 +1,7 @@
+"file","url","bytes","src"
+"analytes_list.json","https://biologicalvariation.eu/analytes.json","100078","d152559ce528-web_fetch.txt"
+"api_analytes.json","https://biologicalvariation.eu/api/analytes","100078","5a29943e805e-web_fetch.txt"
+"analyte_specifications_1515.json","https://biologicalvariation.eu/api/analyte_specifications/1515","100078","bf561ca96595-web_fetch.txt"
+"meta_calculations.json","https://biologicalvariation.eu/api/meta_calculations/","100078","7b473e7d8133-web_fetch.txt"
+"meta_calculations_page2.json","https://biologicalvariation.eu/api/meta_calculations/?page=2","100078","1294c466d524-web_fetch.txt"
+"meta_calculations_limit_offset.json","https://biologicalvariation.eu/api/meta_calculations/?limit=2&offset=35","100078","16ecad81dc88-web_fetch.txt"

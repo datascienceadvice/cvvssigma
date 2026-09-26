@@ -1,0 +1,32 @@
+# --- Manuscript -------------------------------------------------------------
+# The article is not published in this repository (it is under review).
+manuscript.md
+STATYA.md
+
+# --- Reviewer correspondence -------------------------------------------------
+issues.txt
+
+# --- Internal working notes --------------------------------------------------
+docs/NOTES.md
+
+# --- Raw EFLM Biological Variation Database content --------------------------
+# The EFLM licence forbids redistributing the database content or storing it in
+# any other website or electronic retrieval system. Raw responses, the manual
+# top-up file and every pipeline artefact that carries CV_I / CV_G columns in
+# explicit form are therefore excluded from this repository.
+data/raw/*.json
+data/raw/topup_meta.csv
+out/bv_meta.csv
+out/sigma_specs.csv
+out/sigma_requirements.csv
+out/table1_analytes_desirable.csv
+out/worked_example.csv
+out/article_tables.md
+
+# --- Local / editor artefacts ------------------------------------------------
+.Rhistory
+.RData
+.Rproj.user/
+*.log
+Thumbs.db
+.DS_Store
