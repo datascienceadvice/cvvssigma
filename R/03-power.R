@@ -23,8 +23,19 @@
 #    вниз примерно в [1 - (1-p)^K] / (K*p) раз (при p = 0.0027 и K = 50 это
 #    около -6.4%), а при больших p упирается в потолок 1/K; он здесь не
 #    используется.
-# 2) ARL = 1 / Pfr — стандартное определение для схем контроля; ДИ получается
-#    обращением границ ДИ для Pfr.
+# 2) ARL. Оценивается напрямую как среднее число серий от начала контроля до
+#    первого сигнала (zero-state ARL) и отдельно в установившемся режиме
+#    (после прогрева B_WARM серий). Оцениватель УСТОЙЧИВ К ЦЕНЗУРИРОВАНИЮ:
+#    цепочки, не давшие сигнала за L серий, не отбрасываются, а получают
+#    подстановочное значение L + 1/p (для прогретого режима (L - B_WARM) + 1/p),
+#    то есть ожидаемое остаточное время. Прежняя версия усредняла только
+#    цепочки со сигналом и потому систематически занижала ARL: отброшенными
+#    оказывались самые длинные наблюдения. Горизонт L = ARL_RUNS_MULT / Pfr
+#    выбран так, чтобы доля цензурирования была порядка 1e-5.
+#    ДИ строятся по t-распределению между цепочками.
+#    ARL = 1 / Pfr приводится рядом как отдельная величина; для правил без
+#    памяти она совпадает с zero-state ARL, для правил с памятью сопоставима с
+#    ARL заполненного буфера.
 # 3) Ped. Моделируется появление сдвига: цепочка начинается в контрольном
 #    состоянии (B_RUNS серий), затем сдвиг вводится и сохраняется; фиксируется,
 #    сработала ли схема в пределах K_RUNS серий после появления сдвига.
@@ -55,11 +66,11 @@ N_REP_DET     <- 20000L    # цепочек на клетку (обнаруже�
 K_RUNS        <- 100L      # окно обнаружения сдвига, серий
 B_RUNS        <- 20L       # серий контрольного состояния до появления сдвига
 BLOCK_DET     <- 2000L     # размер блока цепочек (обнаружение)
-N_REP_ARL     <- 10000L    # цепочек для оценки истинной ARL (время до 1-го сигнала)
+N_REP_ARL     <- 10000L    # цепочек для оценки ARL по Монте-Карло (время до 1-го сигнала)
 BLOCK_ARL     <- 1000L     # размер блока цепочек (ARL)
 ARL_MIN_RUNS  <- 300L      # минимальная длина цепочки при оценке ARL
-ARL_MAX_RUNS  <- 4000L     # максимальная длина цепочки при оценке ARL
-ARL_RUNS_MULT <- 6         # длина цепочки = ARL_RUNS_MULT / Pfr (цензурирование ~ e^-6)
+ARL_MAX_RUNS  <- 6000L     # максимальная длина цепочки при оценке ARL
+ARL_RUNS_MULT <- 12        # длина цепочки = ARL_RUNS_MULT / Pfr (цензурирование ~ e^-12)
 B_WARM        <- 20L       # прогрев для оценки ARL в установившемся режиме
 SHIFTS        <- c(0.5, 1, 1.5, 2, 3)
 CONF          <- 0.95
@@ -199,7 +210,7 @@ false_rejection <- function(scheme, n_per_run, rules) {
   )
 }
 
-# --- истинная ARL: среднее число серий от начала контроля до первого сигнала --
+# --- ARL по Монте-Карло: среднее число серий от начала контроля до сигнала ---
 # Основное определение — zero-state ARL: цепочка стартует без предшествующей истории
 # (первая серия — первая серия контроля), фиксируется номер первой серии со
 # срабатыванием. Это стандартное для SPC определение «среднего числа выборок от
@@ -208,7 +219,8 @@ false_rejection <- function(scheme, n_per_run, rules) {
 # сигнала за первые B_WARM серий, берётся ОСТАТОЧНОЕ время от конца прогрева до
 # первого сигнала (счёт начинается заново, поэтому величина сопоставима с zero-state
 # ARL). Длина цепочки выбирается так, чтобы доля цензурированных наблюдений была
-# порядка e^-6.
+# порядка e^-12, а сами цензурированные цепочки получают подстановочное значение
+# (см. комментарий к оценивателю ARL в шапке файла).
 arl_first_signal <- function(scheme, n_per_run, rules, p_stationary) {
   rules <- strsplit(rules, ",", fixed = TRUE)[[1]]
   L <- as.integer(ceiling(min(max(ARL_MIN_RUNS, ARL_RUNS_MULT / p_stationary),
@@ -225,7 +237,9 @@ arl_first_signal <- function(scheme, n_per_run, rules, p_stationary) {
     f[none] <- NA_integer_
     ok <- !is.na(f)
     hits <- hits + sum(ok)
-    first_all <- c(first_all, f[ok])
+    # цензурированные справа цепочки (сигнала нет за L серий) не отбрасываются,
+    # а получают ожидаемое остаточное время L + 1/p
+    first_all <- c(first_all, f[ok], rep(L + 1 / p_stationary, sum(!ok)))
 
     # установившийся режим: у цепочек без сигнала в прогреве (f > B_WARM или нет
     # сигнала вовсе) первое срабатывание совпадает с первым срабатыванием вообще,
@@ -235,7 +249,8 @@ arl_first_signal <- function(scheme, n_per_run, rules, p_stationary) {
       okw <- qualified & ok
       warm_n <- warm_n + sum(qualified)
       warm_hits <- warm_hits + sum(okw)
-      warm_all <- c(warm_all, f[okw] - B_WARM)
+      warm_all <- c(warm_all, f[okw] - B_WARM,
+                    rep((L - B_WARM) + 1 / p_stationary, sum(qualified & !ok)))
     }
 
     done <- done + nb
@@ -244,9 +259,10 @@ arl_first_signal <- function(scheme, n_per_run, rules, p_stationary) {
   ciw <- mean_ci_t(warm_all)
   tibble(
     scheme = scheme, runs_arl = L, n_replicates_arl = N_REP_ARL,
-    arl_hits = hits, censored_frac = 1 - hits / N_REP_ARL,
-    arl_true = ci[["mean"]],
-    arl_true_lo = ci[["lo"]], arl_true_hi = ci[["hi"]],
+    arl_hits = hits, n_censored_arl = N_REP_ARL - hits,
+    censored_frac = 1 - hits / N_REP_ARL,
+    arl_mc = ci[["mean"]],
+    arl_mc_lo = ci[["lo"]], arl_mc_hi = ci[["hi"]],
     n_chains_warm = warm_n,
     warm_censored_frac = 1 - warm_hits / max(warm_n, 1L),
     arl_warm = ciw[["mean"]],
@@ -318,8 +334,10 @@ fr <- fr %>%
     exact_p_per_run = ifelse(rules == "1_3s", p_exact(0, n_per_run), NA_real_),
     exact_arl       = ifelse(rules == "1_3s", 1 / p_exact(0, n_per_run), NA_real_),
     # относительные расхождения: zero-state ARL, установившийся режим и 1/Pfr
-    arl_true_over_geom = arl_true / arl_1_over_pfr,
-    arl_warm_over_zero = arl_warm / arl_true
+    arl_over_pfr = arl_mc / arl_1_over_pfr,
+    arl_warm_over_zero = arl_warm / arl_mc,
+    # отклонение МК-оценки от точного аналитического значения (только 1-3s), %
+    dev_from_exact_pct = ifelse(is.na(exact_arl), NA_real_, 100 * (arl_mc / exact_arl - 1))
   )
 det <- det %>%
   left_join(schemes %>% select(scheme, n_per_run, rules), by = c("scheme", "n_per_run")) %>%
@@ -351,29 +369,29 @@ saveRDS(list(false_rejection = fr, detection = det, arl = arls, estimator = est_
 cat("Схемы контроля:\n"); print(schemes, n = nrow(schemes))
 cat(sprintf("\nВремя расчёта: %.1f с\n", elapsed))
 
-cat("\nPfr (стационарная частота сигналов) и истинная ARL по схемам:\n")
+cat("\nPfr (стационарная частота сигналов) и ARL по схемам:\n")
 print(fr %>% transmute(
   scheme,
   Pfr = sprintf("%.5f (%.5f-%.5f)", p_per_run, p_lo, p_hi),
-  ARL_true = sprintf("%.1f (%.1f-%.1f)", arl_true, arl_true_lo, arl_true_hi),
+  ARL_mc = sprintf("%.1f (%.1f-%.1f)", arl_mc, arl_mc_lo, arl_mc_hi),
   one_over_Pfr = sprintf("%.1f", arl_1_over_pfr),
-  ratio = sprintf("%.3f", arl_true_over_geom),
-  runs = runs_arl, censored = sprintf("%.4f", censored_frac)
+  ratio = sprintf("%.3f", arl_over_pfr),
+  runs = runs_arl, censored = sprintf("%.6f", censored_frac)
 ) %>% as.data.frame(), row.names = FALSE)
 
-cat("\nКонтроль корректности ARL для схем 1-3s (точное значение должно попадать в 95% ДИ zero-state):\n")
+cat("\nКонтроль корректности ARL для схем 1-3s (точное значение должно попадать в 95% ДИ оценки):\n")
 print(fr %>% filter(!is.na(exact_arl)) %>%
-        transmute(scheme, ARL_zero = round(arl_true, 1), ARL_warm = round(arl_warm, 1),
+        transmute(scheme, ARL_zero = round(arl_mc, 1), ARL_warm = round(arl_warm, 1),
                   ARL_exact = round(exact_arl, 1),
-                  in_ci_zero = exact_arl >= arl_true_lo & exact_arl <= arl_true_hi,
-                  dev_zero_pct = round(100 * (arl_true / exact_arl - 1), 2),
+                  in_ci_zero = exact_arl >= arl_mc_lo & exact_arl <= arl_mc_hi,
+                  dev_zero_pct = round(100 * (arl_mc / exact_arl - 1), 2),
                   dev_warm_pct = round(100 * (arl_warm / exact_arl - 1), 2)) %>%
         as.data.frame(), row.names = FALSE)
 
 cat("\nВлияние начала наблюдения на ARL (zero-state и установившийся режим):\n")
 print(fr %>% transmute(
   scheme,
-  ARL_zero = sprintf("%.1f", arl_true),
+  ARL_zero = sprintf("%.1f", arl_mc),
   ARL_warm = sprintf("%.1f", arl_warm),
   ratio = sprintf("%.3f", arl_warm_over_zero),
   chains_warm = n_chains_warm,

@@ -1,13 +1,16 @@
 # --- Manuscript -------------------------------------------------------------
 # The article is not published in this repository (it is under review).
 manuscript.md
-STATYA.md
+manuscript.docx
 
 # --- Reviewer correspondence -------------------------------------------------
 issues.txt
 
 # --- Internal working notes --------------------------------------------------
 docs/NOTES.md
+
+# --- Internal review panel output --------------------------------------------
+review/
 
 # --- Raw EFLM Biological Variation Database content --------------------------
 # The EFLM licence forbids redistributing the database content or storing it in
@@ -28,5 +31,6 @@ out/article_tables.md
 .RData
 .Rproj.user/
 *.log
+~$*.docx
 Thumbs.db
 .DS_Store

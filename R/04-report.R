@@ -68,10 +68,13 @@ write.csv(t2, file.path(out_dir, "table2_requirement_vs_bv.csv"),
           row.names = FALSE, fileEncoding = "UTF-8")
 
 # --- Таблица S1: операционные характеристики схем контроля -------------------
+# arl_mc — оценка ARL по Монте-Карло, устойчивая к цензурированию; arl_over_pfr —
+# отношение к обратной стационарной частоте сигналов (для правил без памяти должно
+# быть близко к 1, для правил с памятью сравнимо с ARL заполненного буфера, S6).
 t3 <- fr %>%
   select(scheme, n_per_run, p_per_run, p_lo, p_hi,
-         arl_true, arl_true_lo, arl_true_hi, arl_1_over_pfr,
-         exact_p_per_run, exact_arl, runs_arl, censored_frac) %>%
+         arl_mc, arl_mc_lo, arl_mc_hi, arl_1_over_pfr,
+         exact_p_per_run, exact_arl, runs_arl, n_censored_arl, censored_frac) %>%
   left_join(det %>% select(scheme, shift_sd, p_detect_k, pd_lo, pd_hi) %>%
               pivot_wider(names_from = shift_sd,
                           values_from = c(p_detect_k, pd_lo, pd_hi),
@@ -79,11 +82,12 @@ t3 <- fr %>%
             by = "scheme") %>%
   mutate(
     across(c(p_per_run, p_lo, p_hi, exact_p_per_run), ~ round(.x, 6)),
-    across(c(arl_true, arl_true_lo, arl_true_hi, arl_1_over_pfr, exact_arl), ~ round(.x, 1)),
+    across(c(arl_mc, arl_mc_lo, arl_mc_hi, arl_1_over_pfr, exact_arl), ~ round(.x, 1)),
+    arl_over_pfr = round(arl_mc / arl_1_over_pfr, 4),
     across(starts_with("p_detect_k_s"), ~ round(.x, 6)),
     across(starts_with("pd_lo_s"), ~ round(.x, 6)),
     across(starts_with("pd_hi_s"), ~ round(.x, 6)),
-    censored_frac = round(censored_frac, 4)
+    censored_frac = round(censored_frac, 6)
   )
 
 write.csv(t3, file.path(out_dir, "table_s1_qc_operating_characteristics.csv"),
@@ -108,14 +112,14 @@ write.csv(t5, file.path(out_dir, "table_s5_level_strictness.csv"),
 # --- Таблица S6: влияние начала наблюдения на ARL ----------------------------
 t6 <- fr %>%
   transmute(scheme, n_per_run,
-            arl_zero = round(arl_true, 2),
-            arl_zero_lo = round(arl_true_lo, 2), arl_zero_hi = round(arl_true_hi, 2),
+            arl_zero = round(arl_mc, 2),
+            arl_zero_lo = round(arl_mc_lo, 2), arl_zero_hi = round(arl_mc_hi, 2),
             arl_warm = round(arl_warm, 2),
             arl_warm_lo = round(arl_warm_lo, 2), arl_warm_hi = round(arl_warm_hi, 2),
             one_over_pfr = round(arl_1_over_pfr, 2),
             arl_warm_over_zero = round(arl_warm_over_zero, 4),
             n_chains_warm = n_chains_warm,
-            warm_censored_frac = round(warm_censored_frac, 4))
+            warm_censored_frac = round(warm_censored_frac, 6))
 
 write.csv(t6, file.path(out_dir, "table_s6_arl_start.csv"),
           row.names = FALSE, fileEncoding = "UTF-8")

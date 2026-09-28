@@ -48,11 +48,12 @@ bv <- read.csv(file.path(out_dir, "bv_meta.csv"), stringsAsFactors = FALSE, file
 
 # --- из длинной таблицы в широкую: одна строка на аналит --------------------
 w <- bv %>%
-  select(analyte_id, analyte_name, var_type, median, number_used, matrix, source) %>%
+  select(analyte_id, analyte_name, var_type, median, lower, upper, number_used,
+         matrix, source) %>%
   pivot_wider(
-    id_cols = c(analyte_id, analyte_name, matrix),
+    id_cols = c(analyte_id, analyte_name, matrix, source),
     names_from = var_type,
-    values_from = c(median, number_used, source),
+    values_from = c(median, lower, upper, number_used),
     names_sep = "."
   )
 
@@ -62,7 +63,13 @@ w <- w %>%
     cvg_imputed = is.na(median.cvg),
     median.cvg_used = ifelse(is.na(median.cvg), 0, median.cvg),
     # R = sqrt(1 + (CV_G/CV_I)^2) — относительный вклад межиндивидуальной вариации
-    rel_cvg = sqrt(1 + (median.cvg_used / median.cvi)^2)
+    rel_cvg = sqrt(1 + (median.cvg_used / median.cvi)^2),
+    # границы интервалов входных оценок (нужны для анализа устойчивости, блок S7);
+    # при отсутствии границы берётся сама медиана
+    cvi_lo = ifelse(is.na(lower.cvi), median.cvi, lower.cvi),
+    cvi_hi = ifelse(is.na(upper.cvi), median.cvi, upper.cvi),
+    cvg_lo = ifelse(is.na(lower.cvg), median.cvg_used, lower.cvg),
+    cvg_hi = ifelse(is.na(upper.cvg), median.cvg_used, upper.cvg)
   )
 
 # --- уровни аналитических целей ---------------------------------------------
@@ -203,6 +210,102 @@ s2 <- bind_rows(lapply(SIGMA_TARGETS, function(S) {
 write.csv(s2, file.path(out_dir, "table_s2_threshold_analytes.csv"),
           row.names = FALSE, fileEncoding = "UTF-8")
 
+# --- S7: устойчивость пороговых классификаций к интервалам входных оценок ----
+# База EFLM приводит для каждой оценки не только медиану, но и интервал (lower/upper).
+# Замкнутые формы от медиан не зависят, а СЧЁТНЫЕ классификации зависят: аналит
+# считается не затронутым, когда CV_G/CV_I превышает порог sqrt(4(S-k)^2 - 1).
+# Пересчёт: отношение (k + 0,5R)/S вычисляется при CV на границах интервалов,
+# отдельно по CV_G, отдельно по CV_I и совместно по обеим оценкам.
+R_of <- function(cvi, cvg) sqrt(1 + (cvg / cvi)^2)
+
+s7 <- bind_rows(lapply(SIGMA_TARGETS, function(S) {
+  # ratio_max — наиболее благоприятное для гипотезы «не затронут» сочетание границ
+  # (CV_I на нижней, CV_G на верхней); ratio_min — противоположное.
+  ratio_max <- (K_COVERAGE + 0.5 * R_of(w$cvi_lo, w$cvg_hi)) / S
+  ratio_min <- (K_COVERAGE + 0.5 * R_of(w$cvi_hi, w$cvg_lo)) / S
+  base      <- (K_COVERAGE + 0.5 * R_of(w$median.cvi, w$median.cvg_used)) / S
+  cvg_up    <- (K_COVERAGE + 0.5 * R_of(w$median.cvi, w$cvg_hi)) / S
+  cvg_lo_   <- (K_COVERAGE + 0.5 * R_of(w$median.cvi, w$cvg_lo)) / S
+  cvi_up    <- (K_COVERAGE + 0.5 * R_of(w$cvi_hi, w$median.cvg_used)) / S
+  cvi_lo_   <- (K_COVERAGE + 0.5 * R_of(w$cvi_lo, w$median.cvg_used)) / S
+  robust_strict <- ratio_max < 1   # строже допустимого при любом сочетании границ
+  robust_unaff  <- ratio_min >= 1  # не затронут при любом сочетании границ
+  # запас до порога у аналитов, названных не затронутыми по медианам
+  un <- which(base >= 1)
+  margin <- if (length(un)) min(100 * (base[un] - 1)) else NA_real_
+  tibble(
+    sigma_target = S,
+    threshold = round(sqrt(max(4 * (S - K_COVERAGE)^2 - 1, 0)), 2),
+    n_analytes = nrow(w),
+    n_stricter_base = sum(base < 1),
+    n_stricter_cvg_at_upper = sum(cvg_up < 1),
+    n_stricter_cvg_at_lower = sum(cvg_lo_ < 1),
+    n_stricter_cvi_at_upper = sum(cvi_up < 1),
+    n_stricter_cvi_at_lower = sum(cvi_lo_ < 1),
+    n_stricter_joint_least = sum(ratio_min < 1),
+    n_stricter_joint_most = sum(ratio_max < 1),
+    n_robust_stricter = sum(robust_strict),
+    n_robust_unaffected = sum(robust_unaff),
+    n_classification_unstable = sum(!robust_strict & !robust_unaff),
+    n_unaffected_base = length(un),
+    min_margin_unaffected_pct = round(margin, 2)
+  )
+}))
+
+write.csv(s7, file.path(out_dir, "table_s7_threshold_sensitivity.csv"),
+          row.names = FALSE, fileEncoding = "UTF-8")
+
+# --- публикуемый производный перечень по всем аналитам ------------------------
+# Сырые CV_I и CV_G не публикуются (условия использования базы EFLM); приводятся
+# только производные величины и метаданные о числе первичных исследований.
+derived <- req %>%
+  filter(level == "desirable", bias_scenario == "bias=0") %>%
+  select(analyte_name, sigma_target, ratio_bias0 = c_req_over_cv_a,
+         threshold = threshold_cvg_over_cvi_bias0) %>%
+  pivot_wider(names_from = sigma_target,
+              values_from = c(ratio_bias0, threshold),
+              names_prefix = "sigma_") %>%
+  left_join(
+    req %>% filter(level == "desirable", bias_scenario == "bias=allow",
+                   sigma_target == 4) %>%
+      transmute(analyte_name, ratio_biasallow_sigma4 = c_req_over_cv_a),
+    by = "analyte_name") %>%
+  left_join(w %>% transmute(analyte_name,
+                            cvg_over_cvi = round(median.cvg_used / median.cvi, 3),
+                            number_used_cvi = number_used.cvi,
+                            number_used_cvg = number_used.cvg,
+                            cvg_imputed),
+            by = "analyte_name") %>%
+  mutate(across(starts_with("ratio_") | starts_with("threshold_"),
+                ~ round(.x, 4))) %>%
+  select(analyte_name, cvg_over_cvi,
+         ratio_bias0_sigma_4 = ratio_bias0_sigma_4,
+         ratio_bias0_sigma_5 = ratio_bias0_sigma_5,
+         ratio_bias0_sigma_6 = ratio_bias0_sigma_6,
+         threshold_sigma_4 = threshold_sigma_4,
+         threshold_sigma_5 = threshold_sigma_5,
+         threshold_sigma_6 = threshold_sigma_6,
+         ratio_biasallow_sigma4,
+         number_used_cvi, number_used_cvg, cvg_imputed) %>%
+  arrange(analyte_name)
+
+write.csv(derived, file.path(out_dir, "table1_analytes_derived.csv"),
+          row.names = FALSE, fileEncoding = "UTF-8")
+
+# --- перечень идентификаторов панели (для воспроизведения состава) ------------
+panel_ids <- bv %>%
+  select(analyte_id, analyte_name, var_type, number_used, matrix, source) %>%
+  pivot_wider(id_cols = c(analyte_id, analyte_name, matrix, source),
+              names_from = var_type,
+              values_from = number_used, names_prefix = "number_used_") %>%
+  transmute(analyte_id, analyte_name, matrix, provenance = source,
+            number_used_cvi = number_used_cvi,
+            number_used_cvg = number_used_cvg) %>%
+  arrange(provenance, analyte_name)
+
+write.csv(panel_ids, file.path(root, "data", "panel_analyte_ids.csv"),
+          row.names = FALSE, fileEncoding = "UTF-8")
+
 # --- рабочий пример численной проверки (для текста статьи) -------------------
 worked <- spec %>%
   filter(level == "desirable", analyte_name %in% c("Sodium", "C-reactive protein (CRP)")) %>%
@@ -289,8 +392,15 @@ print(reg %>% select(sigma_target, n_stricter_k = n_stricter, median_k = median_
 cat("\nАналиты выше порога CV_G/CV_I (не затронуты расхождением):\n")
 print(s2 %>% as.data.frame(), row.names = FALSE)
 
+cat("\nS7. Устойчивость пороговых классификаций к интервалам входных оценок:\n")
+print(s7 %>% as.data.frame(), row.names = FALSE)
+
+cat("\nЧисло первичных исследований (CV_I): не более 3 у",
+    sum(w$number_used.cvi <= 3), "из", nrow(w), "; равно 1 у", sum(w$number_used.cvi == 1), "\n")
+
 cat("\nРабочий пример для текста статьи:\n")
 print(worked %>% as.data.frame(), row.names = FALSE)
 
 cat("\nСформировано: out/k_sensitivity.csv, out/table_s2_threshold_analytes.csv,",
-    "out/worked_example.csv\n")
+    "out/table_s7_threshold_sensitivity.csv, out/table1_analytes_derived.csv,",
+    "data/panel_analyte_ids.csv, out/worked_example.csv\n")
