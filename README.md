@@ -50,7 +50,7 @@ With one and the same TEa used by both frameworks:
   (point estimates 92 / 98 / 98). The classification changes for 42, 24 and 14 analytes
   respectively, and no analyte stays unaffected under every combination of bounds
   (`out/table_s7_threshold_sensitivity.csv`). CEA at σ = 6 sits 0.31 % above the threshold.
-- **Quality control schemes.** False-rejection probability per run rises from 0.00270
+- **Quality control schemes** (supplementary material only; the Monte Carlo step validates the pipeline and illustrates the thresholds rather than testing the main hypothesis). False-rejection probability per run rises from 0.00270
   (1-3s, N = 1) to 0.04088 (full rule set plus 10x, N = 4); the Monte Carlo average run
   length falls from 369.6 to 25.3 runs; the probability of a signal at a 1 SD shift within
   100 runs rises from 0.899 to 1.000. At a 2 SD shift the lower 95 % confidence bound is at
@@ -234,7 +234,8 @@ Published with the repository:
 | `out/k_sensitivity.csv` | Sensitivity of the results to the imprecision multiplier `k` |
 | `out/estimator_comparison.csv` | Naive versus stationary false-rejection estimator |
 | `out/qc_false_rejection.csv`, `out/qc_power.csv`, `out/qc_power.rds` | Full Monte Carlo results |
-| `out/fig1_required_imprecision.png`, `out/fig2_ratio_to_bv.png`, `out/figS1_qc_power.png` | Figures (300 dpi) |
+| `out/fig1_bv_vs_sigma.png`, `out/fig2_ratio_to_bv.png` | Main figures (300 dpi): the analytical relationship between the two frameworks, and the distribution of the ratio across the panel |
+| `out/figS1_qc_power.png`, `out/figS2_required_imprecision.png` | Supplementary figures (300 dpi): Monte Carlo scheme performance, and required imprecision by stringency level |
 
 Generated locally only, and therefore absent from the clone (see
 [`.gitignore`](.gitignore)): `out/bv_meta.csv`, `out/sigma_specs.csv`,

@@ -124,49 +124,73 @@ t6 <- fr %>%
 write.csv(t6, file.path(out_dir, "table_s6_arl_start.csv"),
           row.names = FALSE, fileEncoding = "UTF-8")
 
-# устаревшие артефакты версии 2.0 (таблица 3 и рисунок 3 перенесены в дополнительные материалы)
-for (f in c("table3_qc_operating_characteristics.csv", "fig3_qc_power.png")) {
+# устаревшие артефакты (переименованные рисунки предыдущих версий)
+for (f in c("table3_qc_operating_characteristics.csv", "fig3_qc_power.png",
+            "fig1_required_imprecision.png")) {
   p <- file.path(out_dir, f)
   if (file.exists(p)) unlink(p)
 }
 
-# --- Рисунок 1: требуемая неточность против цели по биологической вариации ---
-f1 <- req %>%
-  filter(bias_scenario == "bias=0") %>%
-  mutate(sigma_target = factor(sigma_target, levels = c(4, 5, 6)),
-         level = factor(level, levels = LEVELS))
+# --- Рисунок 1: аналитическая связь требований BV и сигма-метрики ------------
+# Отношение CV_треб/CV_A как функция наблюдаемого смещения, выраженного в долях
+# допустимого: ratio(beta) = (k + 0.5 * R * (1 - beta)) / sigma, где
+# beta = |bias| / Bias_доп и R = sqrt(1 + (CV_G/CV_I)^2). При beta = 1 все
+# аналиты сходятся в k/sigma (свойства аналита исчезают), при beta = 0 разброс
+# максимален и определяется отношением CV_G/CV_I. Полоса — диапазон R по панели,
+# линия — медиана R, пунктир — граница «строже цели» (ratio = 1), точечная
+# горизонталь — аналитический предел k/sigma.
+R_panel <- req %>% filter(level == "desirable", bias_scenario == "bias=0") %>%
+  distinct(analyte_id, rel_cvg) %>% pull(rel_cvg)
+R_rng <- range(R_panel); R_med <- median(R_panel)
+cat("\nРисунок 1: R по панели — от", round(R_rng[1], 3), "до", round(R_rng[2], 3),
+    ", медиана", round(R_med, 3), "\n")
 
-p1 <- ggplot(f1, aes(x = level, y = c_req, fill = sigma_target)) +
-  geom_boxplot(outlier.size = 0.4) +
+g1 <- expand.grid(beta = seq(0, 1, by = 0.005), sigma_target = c(4, 5, 6)) %>%
+  mutate(
+    lo  = (K_COVERAGE + 0.5 * R_rng[1] * (1 - beta)) / sigma_target,
+    hi  = (K_COVERAGE + 0.5 * R_rng[2] * (1 - beta)) / sigma_target,
+    med = (K_COVERAGE + 0.5 * R_med    * (1 - beta)) / sigma_target,
+    sigma_target = factor(sigma_target, levels = c(4, 5, 6))
+  )
+floor1 <- data.frame(sigma_target = factor(c(4, 5, 6), levels = c(4, 5, 6)),
+                     y = K_COVERAGE / c(4, 5, 6))
+
+p1 <- ggplot(g1, aes(x = beta)) +
+  geom_ribbon(aes(ymin = lo, ymax = hi), fill = "grey80") +
+  geom_line(aes(y = med), linewidth = 0.9) +
+  geom_hline(yintercept = 1, linetype = "dashed") +
+  geom_hline(data = floor1, aes(yintercept = y), linetype = "dotted", linewidth = 0.4) +
   facet_wrap(~ sigma_target, nrow = 1,
              labeller = labeller(sigma_target = function(x) paste0("Sigma = ", x))) +
-  labs(x = "Analytical performance level (Fraser hierarchy)",
-       y = "Required method imprecision, CV (%)",
-       fill = "Sigma target") +
-  theme_bw(base_size = 11) +
-  theme(legend.position = "none")
-ggsave(file.path(out_dir, "fig1_required_imprecision.png"), p1, width = 8, height = 4.5, dpi = 300)
-
-# --- Рисунок 2: отношение требуемой неточности к допустимой по BV -----------
-# Вертикаль на 1 — граница «строже цели»; вертикаль на k/sigma — аналитический
-# предел для сценария, в котором смещение находится на границе допуска.
-f2 <- req %>%
-  filter(bias_scenario == "bias=0") %>%
-  mutate(sigma_target = factor(sigma_target, levels = c(4, 5, 6)),
-         level = factor(level, levels = LEVELS))
-lim <- data.frame(sigma_target = factor(c(4, 5, 6), levels = c(4, 5, 6)),
-                  x = K_COVERAGE / c(4, 5, 6))
-
-p2 <- ggplot(f2, aes(x = c_req_over_cv_a, fill = level)) +
-  geom_histogram(bins = 30, alpha = 0.8) +
-  geom_vline(xintercept = 1, linetype = "dashed") +
-  geom_vline(data = lim, aes(xintercept = x), linetype = "solid", linewidth = 0.4) +
-  facet_wrap(~ sigma_target, nrow = 1,
-             labeller = labeller(sigma_target = function(x) paste0("Sigma = ", x))) +
-  labs(x = "Required imprecision / allowable imprecision (biological variation)",
-       y = "Number of analytes", fill = "Level") +
+  labs(x = "Observed bias as a fraction of the allowable bias, |bias| / Bias_allow",
+       y = "Required imprecision / allowable imprecision  (CV_req / CV_A)") +
   theme_bw(base_size = 11)
-ggsave(file.path(out_dir, "fig2_ratio_to_bv.png"), p2, width = 9, height = 4.5, dpi = 300)
+ggsave(file.path(out_dir, "fig1_bv_vs_sigma.png"), p1, width = 9, height = 4, dpi = 300)
+
+# --- Рисунок 2: распределение отношения по панели ---------------------------
+# Три панели по целевой сигме; вертикаль ratio = 1 — граница «строже цели»,
+# сплошная вертикаль — медиана по панели. Подписи дают число аналитов строже
+# границы и медиану.
+f2 <- req %>%
+  filter(bias_scenario == "bias=0", level == "desirable") %>%
+  mutate(sigma_target = factor(sigma_target, levels = c(4, 5, 6)))
+ann2 <- f2 %>% group_by(sigma_target) %>%
+  summarise(n = n(), k = sum(c_req_over_cv_a < 1),
+            med = median(c_req_over_cv_a), .groups = "drop") %>%
+  mutate(lab = sprintf("stricter: %d of %d\nmedian %.3f", k, n, med))
+
+p2 <- ggplot(f2, aes(x = c_req_over_cv_a)) +
+  geom_histogram(bins = 22, fill = "grey75", colour = "grey35", linewidth = 0.25) +
+  geom_vline(xintercept = 1, linetype = "dashed") +
+  geom_vline(data = ann2, aes(xintercept = med), linewidth = 0.4) +
+  geom_text(data = ann2, aes(x = Inf, y = Inf, label = lab),
+            hjust = 1.08, vjust = 1.15, size = 3) +
+  facet_wrap(~ sigma_target, nrow = 1, scales = "free_y",
+             labeller = labeller(sigma_target = function(x) paste0("Sigma = ", x))) +
+  labs(x = "Required imprecision / allowable imprecision  (CV_req / CV_A)",
+       y = "Number of analytes") +
+  theme_bw(base_size = 11)
+ggsave(file.path(out_dir, "fig2_ratio_to_bv.png"), p2, width = 9, height = 4, dpi = 300)
 
 # --- Рисунок S1: операционные характеристики схем контроля ------------------
 p3 <- ggplot(det, aes(x = shift_sd, y = p_detect_k, colour = scheme)) +
@@ -178,6 +202,21 @@ p3 <- ggplot(det, aes(x = shift_sd, y = p_detect_k, colour = scheme)) +
   theme_bw(base_size = 11)
 ggsave(file.path(out_dir, "figS1_qc_power.png"), p3, width = 8.5, height = 5, dpi = 300)
 
+# --- Рисунок S2: требуемая неточность по уровням строгости -------------------
+fS2 <- req %>%
+  filter(bias_scenario == "bias=0") %>%
+  mutate(sigma_target = factor(sigma_target, levels = c(4, 5, 6)),
+         level = factor(level, levels = LEVELS))
+
+pS2 <- ggplot(fS2, aes(x = level, y = c_req)) +
+  geom_boxplot(outlier.size = 0.4, fill = "grey85") +
+  facet_wrap(~ sigma_target, nrow = 1,
+             labeller = labeller(sigma_target = function(x) paste0("Sigma = ", x))) +
+  labs(x = "Analytical performance level (Fraser hierarchy)",
+       y = "Required method imprecision, CV (%)") +
+  theme_bw(base_size = 11)
+ggsave(file.path(out_dir, "figS2_required_imprecision.png"), pS2, width = 8, height = 4.5, dpi = 300)
+
 # --- отчёт ------------------------------------------------------------------
 cat("Сформировано:\n")
 cat("  table1_analytes_desirable.csv                    —", nrow(t1), "аналитов\n")
@@ -185,7 +224,7 @@ cat("  table2_requirement_vs_bv.csv                     —", nrow(t2), "стр�
 cat("  table_s1_qc_operating_characteristics.csv        —", nrow(t3), "строк\n")
 cat("  table_s5_level_strictness.csv                    —", nrow(t5), "строк\n")
 cat("  table_s6_arl_start.csv                           —", nrow(t6), "строк\n")
-cat("  fig1_required_imprecision.png\n  fig2_ratio_to_bv.png\n  figS1_qc_power.png\n")
+cat("  fig1_bv_vs_sigma.png\n  fig2_ratio_to_bv.png\n  figS1_qc_power.png\n  figS2_required_imprecision.png\n")
 
 cat("\nТаблица 2 (все сценарии и уровни):\n")
 print(t2 %>% select(bias_scenario, level, sigma_target, n_stricter, pct_stricter,
