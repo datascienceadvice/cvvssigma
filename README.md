@@ -1,14 +1,14 @@
 # cvvssigma
 
 **Consistency of biological-variation goals and the sigma metric in internal quality
-control planning: an analytical result and its illustration on a panel of 101 analytes.**
+control planning: an analytical result and its illustration on a panel of 100 analytes.**
 
 This repository contains the R code, derived tables and figures for a study that compares
 two frameworks used together when planning internal quality control in clinical
 laboratories — analytical goals derived from biological variation (the Fraser and Petersen
 hierarchy) and the Six Sigma metric. Both frameworks are expressed through a single
 allowable total error (TEa). The study answers the question analytically under a shared TEa
-and illustrates the answer quantitatively on a panel of 101 analytes.
+and illustrates the answer quantitatively on a panel of 100 analytes (101 were assembled; ferritin is excluded because the database publishes no CV_G meta-analysis for it).
 
 Repository: <https://github.com/datascienceadvice/cvvssigma>
 
@@ -21,13 +21,13 @@ With one and the same TEa used by both frameworks:
 - **Bias at the allowable limit.** The ratio of the imprecision required for a target sigma
   to the biological-variation-derived allowable imprecision equals `k / σ`, where `k` is the
   imprecision multiplier. This is an algebraic identity: it depends on neither the analyte
-  nor the stringency level, and it would be the same for 5, 101 or 1000 analytes. It is
-  below 1 for **all 101 analytes** at σ = 4, 5 and 6 for any `k < 4`
+  nor the stringency level, and it would be the same for 5, 100 or 1000 analytes. It is
+  below 1 for **all 100 analytes** at σ = 4, 5 and 6 for any `k < 4`
   (0.4125 / 0.3300 / 0.2750 at `k` = 1.65).
 - **Zero bias (idealised scenario).** The ratio becomes `(k + 0.5·R) / σ`, where
   `R = sqrt(1 + (CV_G/CV_I)²)`. At the desirable level the sigma requirement is stricter
-  than the biological-variation goal for **92 of 101 analytes (91.1 %)** at σ = 4 and for
-  **98 of 101 (97.0 %)** at σ = 5 and 6; the median ratios are 0.730, 0.584 and 0.486.
+  than the biological-variation goal for **91 of 100 analytes (91.0 %)** at σ = 4 and for
+  **97 of 100 (97.0 %)** at σ = 5 and 6; the median ratios are 0.731, 0.584 and 0.487.
   An analyte escapes only if `CV_G/CV_I` exceeds `sqrt(4(σ − k)² − 1)` — 4.59 at σ = 4,
   6.62 at σ = 5, 8.64 at σ = 6 — which selects 9 analytes at σ = 4 and
   3 (CA 19-9, alpha-fetoprotein, CEA) at σ = 5 and 6.
@@ -35,18 +35,18 @@ With one and the same TEa used by both frameworks:
   a method that reaches the target sigma automatically meets the biological-variation goal;
   the converse fails. A method operating exactly at the desirable goal attains
   `σ = k = 1.65` with bias at the allowable limit and `σ = k + 0.5·R` with zero bias — a
-  panel median of **2.9**, below the threshold of 4 for 92 of 101 analytes. The desirable
+  panel median of **2.9**, below the threshold of 4 for 91 of 100 analytes. The desirable
   goal is therefore not the binding constraint.
 - **The stringency level does not change this.** It is the ratio to CV_A that is
-  level-invariant (0.486 at σ = 6 for optimal, desirable and minimum alike), while the
+  level-invariant (0.487 at σ = 6 for optimal, desirable and minimum alike), while the
   ratio to CV_I (0.122 / 0.243 / 0.365) and the absolute requirement (0.91 / 1.82 / 2.74 %)
   scale with the level multiplier.
 - **Robustness to the imprecision multiplier.** At the allowable bias limit the discrepancy
   holds for σ = 4–6 and any `k < 4`; under zero bias the number of affected analytes at
-  σ = 4 falls from 98 of 101 (`k` = 1.0) to 64 of 101 (`k` = 2.58).
+  σ = 4 falls from 97 of 100 (`k` = 1.0) to 63 of 100 (`k` = 2.58).
 - **The threshold lists are not fully robust to input uncertainty.** Substituting the
   lower/upper bounds of the `CV_I` and `CV_G` intervals reported by the database moves the
-  number of affected analytes to 59–101 at σ = 4, 77–101 at σ = 5 and 87–101 at σ = 6
+  number of affected analytes to 58–100 at σ = 4, 76–100 at σ = 5 and 86–100 at σ = 6
   (point estimates 92 / 98 / 98). The classification changes for 42, 24 and 14 analytes
   respectively, and no analyte stays unaffected under every combination of bounds
   (`out/table_s7_threshold_sensitivity.csv`). CEA at σ = 6 sits 0.31 % above the threshold.
@@ -101,8 +101,26 @@ The panel contains 101 analytes, assembled from the EFLM Biological Variation Da
   enzymes, hormones, basic haematology) that the truncated bulk response did not contain.
 
 `data/panel_analyte_ids.csv` lists every analyte with its id, matrix, provenance
-(`bulk` / `topup`) and the number of primary studies behind its `CV_I` and `CV_G`. No
-`CV_I` / `CV_G` values are included.
+(`bulk` / `topup`), the number of primary studies behind its `CV_I` and `CV_G`, and the
+`used_in_analysis` flag. No `CV_I` / `CV_G` values are included.
+
+### Why ferritin is excluded
+
+The calculation covers **100 of the 101 analytes**. Ferritin is excluded because the
+database publishes no `CV_G` meta-analysis for it. Individual `CV_G` estimates do exist
+(the serum meta-analysis of `CV_I` draws on two studies, and only one of them reports
+`CV_G`), but no meta-analysis was built from them, and any substitution would determine the
+conclusion for this analyte on its own:
+
+| Assumed `CV_G` for ferritin | Ratio of requirements at σ = 6 | Classification |
+|---|---|---|
+| 0 (the earlier substitution) | 0.358 | stricter than the BV goal |
+| 132 % (the only serum estimate in the database) | 1.134 | BV goal stricter instead |
+
+Because the direction of the conclusion flips with the assumption, the analyte is left out
+rather than filled in. Excluding it moves the headline counts from 92 of 101 (91.1 %) to
+91 of 100 (91.0 %) at σ = 4, and from 98 of 101 to 97 of 100 (97.0 %) at σ = 5 and 6; the
+lists of analytes on the other side of the threshold are unchanged.
 
 ---
 
@@ -205,7 +223,7 @@ Published with the repository:
 | `out/supplementary_tables.md` | Supplementary tables S1–S7 |
 | `out/article_numbers.txt` | Key numbers quoted in the manuscript |
 | `out/session_info.txt` | R version and package versions used for the results |
-| `out/table1_analytes_derived.csv` | Per-analyte derived quantities for all 101 analytes (ratios, thresholds, study counts; no `CV_I` / `CV_G` values) |
+| `out/table1_analytes_derived.csv` | Per-analyte derived quantities for the 100 analysed analytes (ratios, thresholds, study counts; no `CV_I` / `CV_G` values) |
 | `data/panel_analyte_ids.csv` | Panel composition and provenance |
 | `out/table2_requirement_vs_bv.csv` | Ratio of sigma requirements to biological-variation goals by scenario and level |
 | `out/table_s1_qc_operating_characteristics.csv` | Pfr, Monte Carlo ARL, filled-buffer ARL and signal probability for six control schemes |

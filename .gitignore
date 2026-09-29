@@ -1,7 +1,9 @@
 # --- Manuscript -------------------------------------------------------------
 # The article is not published in this repository (it is under review).
 manuscript.md
-manuscript.docx
+# All Word documents are working artefacts (the manuscript, its source copy and
+# the reviewer correspondence) and must never be published.
+*.docx
 
 # --- Reviewer correspondence -------------------------------------------------
 issues.txt

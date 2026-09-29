@@ -1,102 +1,102 @@
-"analyte_id","analyte_name","matrix","provenance","number_used_cvi","number_used_cvg"
-391,"17-a-hydroxyprogesterone","Serum/plasma","bulk",3,3
-668,"25-hydroxy vitamin D3","Serum/plasma","bulk",6,5
-1664,"ADAMTS-13 activity","Plasma","bulk",1,1
-1663,"ADAMTS-13 antigen","Plasma","bulk",1,1
-1649,"Activated partial thromboplastin time (APTT)","Plasma","bulk",8,7
-1662,"Activated protein C resistance (APCR)","Plasma","bulk",3,2
-1037,"Actual bicarbonate","Whole Blood","bulk",1,1
-1494,"Adiponectin","Serum/plasma","bulk",2,2
-1495,"Alanine transaminase (ALT)","Serum/plasma","bulk",6,6
-1515,"Albumin","Serum/plasma","bulk",16,12
-1551,"Aldosterone","Serum/plasma","bulk",1,1
-1690,"Alkaline phosphatase (ALP) - total","Serum/plasma","bulk",10,9
-1192,"Alkaline phosphatase (ALP) bone isoenzyme","Serum/plasma","bulk",1,1
-1517,"Alkaline phosphatase (ALP), liver type","Serum/plasma","bulk",1,1
-1657,"Alpha 2-antiplasmin","Plasma","bulk",3,1
-670,"Alphafetoprotein","Serum/plasma","bulk",2,2
-1504,"Amylase","Serum/plasma","bulk",2,2
-1713,"Amyloid-beta protein 40 (Aβ40)","Serum/plasma","bulk",1,1
-1712,"Amyloid-beta protein 42 (Aβ42)","Serum/plasma","bulk",1,1
-1728,"Amyloid-beta protein 42 (Aβ42)/Amyloid-beta protein 40 (Aβ40)","Serum/plasma","bulk",1,1
-311,"Androstenedione","Serum/plasma","bulk",4,4
-572,"Antimullerian hormone","Serum/plasma","bulk",1,1
-1653,"Antithrombin activity","Plasma","bulk",8,5
-37,"Antithrombin antigen","Plasma","bulk",1,1
-383,"Apolipoprotein A1","Serum/plasma","bulk",15,6
-1516,"Apolipoprotein B","Serum/plasma","bulk",10,6
-1496,"Aspartate transaminase (AST)","Serum/plasma","bulk",5,5
-1537,"Basophils","Whole Blood","bulk",5,4
-540,"Bilirubin","Serum/plasma","bulk",8,6
-230,"Bilirubin - conjugated (direct)","Serum/plasma","bulk",3,3
-1635,"C-reactive protein (CRP)","Serum/plasma","bulk",6,6
-1585,"C-terminal cross-linked telopeptide of type I collagen (CTX)","Serum/plasma","bulk",3,3
-1679,"Calcitonin","Serum/plasma","bulk",1,1
-1087,"Calcium (Ca)","Serum/plasma","bulk",20,14
-1508,"Cancer antigen 125 (CA-125)","Serum/plasma","bulk",3,3
-1506,"Cancer antigen 19-9 (CA 19-9)","Serum/plasma","bulk",3,3
-1237,"Cancer antigen 72-4  (CA 72-4)","Serum/plasma","bulk",1,1
-1645,"Carbon dioxide (total)","Whole Blood","bulk",1,1
-813,"Carcinoembryonic antigen (CEA)","Serum/plasma","bulk",3,3
-219,"Ceruloplasmin","Serum/plasma","bulk",2,2
-1512,"Chloride","Serum/plasma","bulk",11,8
-492,"Cholesterol","Serum/plasma","bulk",36,19
-1031,"Chromogranin A","Serum/plasma","bulk",2,2
-1640,"Cobalamin","Serum/plasma","bulk",4,4
-1555,"Complement 3 (C3)","Serum/plasma","bulk",1,1
-1556,"Complement 4 (C4)","Serum/plasma","bulk",1,1
-1691,"Copeptin","Serum/plasma","bulk",2,2
-1141,"Copper","Serum/plasma","bulk",9,9
-1129,"Cortisol","Serum/plasma","bulk",4,3
-1502,"Creatine Kinase","Serum/plasma","bulk",3,2
-1501,"Creatinine","Serum/plasma","bulk",17,14
-1513,"Cystatin C","Serum/plasma","bulk",5,5
-743,"D-dimer","Plasma","bulk",5,5
-560,"Dehydroepiandrosterone sulphate (DHEAS)","Serum/plasma","bulk",1,1
-1548,"Dihydrotestosterone (DHT)","Serum/plasma","bulk",1,1
-1536,"Eosinophils","Whole Blood","bulk",6,5
-1523,"Erythrocytes","Whole Blood","bulk",8,6
-617,"Estradiol","Serum/plasma","bulk",2,2
-1656,"Factor II (F2)","Plasma","bulk",1,1
-348,"Factor IX (F9)","Plasma","bulk",2,2
-924,"Factor V (F5)","Plasma","bulk",2,1
-624,"Factor VII (F7) activity","Plasma","bulk",5,2
-95,"Factor VIII (F8) activity","Plasma","bulk",8,5
-1002,"Factor X (F10)","Plasma","bulk",3,1
-521,"Factor XI (F11)","Plasma","bulk",1,1
-551,"Factor XII (F12) activity","Plasma","bulk",1,1
-902,"Ferritin","Serum/plasma","bulk",2,NA
-1655,"Fibrinogen","Plasma","bulk",12,10
-863,"Fibroblast growth factor-23","Serum/plasma","bulk",3,3
-535,"Folate","Serum/plasma","bulk",3,3
-417,"Follicle stimulating hormone (FSH)","Serum/plasma","bulk",3,3
-909,"Free kappa light chain","Serum/plasma","bulk",2,2
-748,"Free lambda light chain","Serum/plasma","bulk",2,2
-852,"Fructosamine","Serum/plasma","bulk",1,1
-983,"a-1 antitrypsin","Serum/plasma","bulk",1,1
-1668,"alpha 2 antiplasmin-plasmin complex (a2-antiplasmin/plasmin complex)","Plasma","bulk",3,2
-637,"b-2 microglobulin","Serum/plasma","bulk",2,2
-1518,"Glucose","Serum/plasma","topup",12,10
-106,"HDL cholesterol","Serum/plasma","topup",36,10
-1522,"Haemoglobin (Hb)","Whole Blood","topup",16,13
-1497,"Haemoglobin A1c (IFCC)","Whole Blood","topup",2,2
-1248,"Iron","Serum/plasma","topup",5,3
-1498,"LDL Cholesterol","Serum/plasma","topup",21,12
-728,"Lactate dehydrogenase (LDH) activity","Serum/plasma","topup",2,2
-1532,"Leukocytes","Whole Blood","topup",12,9
-1110,"Magnesium","Serum/plasma","topup",11,10
-242,"Phosphate","Serum/plasma","topup",17,13
-1499,"Potassium","Serum/plasma","topup",11,8
-1554,"Protein (total)","Serum/plasma","topup",13,10
-1500,"Sodium","Serum/plasma","topup",12,9
-318,"Soluble transferrin receptor (sTfr)","Serum/plasma","topup",1,1
-1538,"Thrombocytes","Whole Blood","topup",8,7
-1065,"Thyroid stimulating hormone (TSH)","Serum/plasma","topup",7,7
-940,"Thyroxine - free (FT4)","Serum/plasma","topup",5,5
-694,"Thyroxine - total (T4)","Serum/plasma","topup",5,5
-1632,"Transferrin","Serum/plasma","topup",2,1
-976,"Triglycerides","Serum/plasma","topup",42,14
-703,"Triiodothyronine - free (FT3)","Serum/plasma","topup",4,4
-1639,"Urate","Serum/plasma","topup",16,12
-1514,"Urea","Serum/plasma","topup",14,10
-994,"g-glutamyl transferase activity","Serum/plasma","topup",6,6
+"analyte_id","analyte_name","matrix","provenance","number_used_cvi","number_used_cvg","used_in_analysis"
+391,"17-a-hydroxyprogesterone","Serum/plasma","bulk",3,3,TRUE
+668,"25-hydroxy vitamin D3","Serum/plasma","bulk",6,5,TRUE
+1664,"ADAMTS-13 activity","Plasma","bulk",1,1,TRUE
+1663,"ADAMTS-13 antigen","Plasma","bulk",1,1,TRUE
+1649,"Activated partial thromboplastin time (APTT)","Plasma","bulk",8,7,TRUE
+1662,"Activated protein C resistance (APCR)","Plasma","bulk",3,2,TRUE
+1037,"Actual bicarbonate","Whole Blood","bulk",1,1,TRUE
+1494,"Adiponectin","Serum/plasma","bulk",2,2,TRUE
+1495,"Alanine transaminase (ALT)","Serum/plasma","bulk",6,6,TRUE
+1515,"Albumin","Serum/plasma","bulk",16,12,TRUE
+1551,"Aldosterone","Serum/plasma","bulk",1,1,TRUE
+1690,"Alkaline phosphatase (ALP) - total","Serum/plasma","bulk",10,9,TRUE
+1192,"Alkaline phosphatase (ALP) bone isoenzyme","Serum/plasma","bulk",1,1,TRUE
+1517,"Alkaline phosphatase (ALP), liver type","Serum/plasma","bulk",1,1,TRUE
+1657,"Alpha 2-antiplasmin","Plasma","bulk",3,1,TRUE
+670,"Alphafetoprotein","Serum/plasma","bulk",2,2,TRUE
+1504,"Amylase","Serum/plasma","bulk",2,2,TRUE
+1713,"Amyloid-beta protein 40 (Aβ40)","Serum/plasma","bulk",1,1,TRUE
+1712,"Amyloid-beta protein 42 (Aβ42)","Serum/plasma","bulk",1,1,TRUE
+1728,"Amyloid-beta protein 42 (Aβ42)/Amyloid-beta protein 40 (Aβ40)","Serum/plasma","bulk",1,1,TRUE
+311,"Androstenedione","Serum/plasma","bulk",4,4,TRUE
+572,"Antimullerian hormone","Serum/plasma","bulk",1,1,TRUE
+1653,"Antithrombin activity","Plasma","bulk",8,5,TRUE
+37,"Antithrombin antigen","Plasma","bulk",1,1,TRUE
+383,"Apolipoprotein A1","Serum/plasma","bulk",15,6,TRUE
+1516,"Apolipoprotein B","Serum/plasma","bulk",10,6,TRUE
+1496,"Aspartate transaminase (AST)","Serum/plasma","bulk",5,5,TRUE
+1537,"Basophils","Whole Blood","bulk",5,4,TRUE
+540,"Bilirubin","Serum/plasma","bulk",8,6,TRUE
+230,"Bilirubin - conjugated (direct)","Serum/plasma","bulk",3,3,TRUE
+1635,"C-reactive protein (CRP)","Serum/plasma","bulk",6,6,TRUE
+1585,"C-terminal cross-linked telopeptide of type I collagen (CTX)","Serum/plasma","bulk",3,3,TRUE
+1679,"Calcitonin","Serum/plasma","bulk",1,1,TRUE
+1087,"Calcium (Ca)","Serum/plasma","bulk",20,14,TRUE
+1508,"Cancer antigen 125 (CA-125)","Serum/plasma","bulk",3,3,TRUE
+1506,"Cancer antigen 19-9 (CA 19-9)","Serum/plasma","bulk",3,3,TRUE
+1237,"Cancer antigen 72-4  (CA 72-4)","Serum/plasma","bulk",1,1,TRUE
+1645,"Carbon dioxide (total)","Whole Blood","bulk",1,1,TRUE
+813,"Carcinoembryonic antigen (CEA)","Serum/plasma","bulk",3,3,TRUE
+219,"Ceruloplasmin","Serum/plasma","bulk",2,2,TRUE
+1512,"Chloride","Serum/plasma","bulk",11,8,TRUE
+492,"Cholesterol","Serum/plasma","bulk",36,19,TRUE
+1031,"Chromogranin A","Serum/plasma","bulk",2,2,TRUE
+1640,"Cobalamin","Serum/plasma","bulk",4,4,TRUE
+1555,"Complement 3 (C3)","Serum/plasma","bulk",1,1,TRUE
+1556,"Complement 4 (C4)","Serum/plasma","bulk",1,1,TRUE
+1691,"Copeptin","Serum/plasma","bulk",2,2,TRUE
+1141,"Copper","Serum/plasma","bulk",9,9,TRUE
+1129,"Cortisol","Serum/plasma","bulk",4,3,TRUE
+1502,"Creatine Kinase","Serum/plasma","bulk",3,2,TRUE
+1501,"Creatinine","Serum/plasma","bulk",17,14,TRUE
+1513,"Cystatin C","Serum/plasma","bulk",5,5,TRUE
+743,"D-dimer","Plasma","bulk",5,5,TRUE
+560,"Dehydroepiandrosterone sulphate (DHEAS)","Serum/plasma","bulk",1,1,TRUE
+1548,"Dihydrotestosterone (DHT)","Serum/plasma","bulk",1,1,TRUE
+1536,"Eosinophils","Whole Blood","bulk",6,5,TRUE
+1523,"Erythrocytes","Whole Blood","bulk",8,6,TRUE
+617,"Estradiol","Serum/plasma","bulk",2,2,TRUE
+1656,"Factor II (F2)","Plasma","bulk",1,1,TRUE
+348,"Factor IX (F9)","Plasma","bulk",2,2,TRUE
+924,"Factor V (F5)","Plasma","bulk",2,1,TRUE
+624,"Factor VII (F7) activity","Plasma","bulk",5,2,TRUE
+95,"Factor VIII (F8) activity","Plasma","bulk",8,5,TRUE
+1002,"Factor X (F10)","Plasma","bulk",3,1,TRUE
+521,"Factor XI (F11)","Plasma","bulk",1,1,TRUE
+551,"Factor XII (F12) activity","Plasma","bulk",1,1,TRUE
+902,"Ferritin","Serum/plasma","bulk",2,NA,FALSE
+1655,"Fibrinogen","Plasma","bulk",12,10,TRUE
+863,"Fibroblast growth factor-23","Serum/plasma","bulk",3,3,TRUE
+535,"Folate","Serum/plasma","bulk",3,3,TRUE
+417,"Follicle stimulating hormone (FSH)","Serum/plasma","bulk",3,3,TRUE
+909,"Free kappa light chain","Serum/plasma","bulk",2,2,TRUE
+748,"Free lambda light chain","Serum/plasma","bulk",2,2,TRUE
+852,"Fructosamine","Serum/plasma","bulk",1,1,TRUE
+983,"a-1 antitrypsin","Serum/plasma","bulk",1,1,TRUE
+1668,"alpha 2 antiplasmin-plasmin complex (a2-antiplasmin/plasmin complex)","Plasma","bulk",3,2,TRUE
+637,"b-2 microglobulin","Serum/plasma","bulk",2,2,TRUE
+1518,"Glucose","Serum/plasma","topup",12,10,TRUE
+106,"HDL cholesterol","Serum/plasma","topup",36,10,TRUE
+1522,"Haemoglobin (Hb)","Whole Blood","topup",16,13,TRUE
+1497,"Haemoglobin A1c (IFCC)","Whole Blood","topup",2,2,TRUE
+1248,"Iron","Serum/plasma","topup",5,3,TRUE
+1498,"LDL Cholesterol","Serum/plasma","topup",21,12,TRUE
+728,"Lactate dehydrogenase (LDH) activity","Serum/plasma","topup",2,2,TRUE
+1532,"Leukocytes","Whole Blood","topup",12,9,TRUE
+1110,"Magnesium","Serum/plasma","topup",11,10,TRUE
+242,"Phosphate","Serum/plasma","topup",17,13,TRUE
+1499,"Potassium","Serum/plasma","topup",11,8,TRUE
+1554,"Protein (total)","Serum/plasma","topup",13,10,TRUE
+1500,"Sodium","Serum/plasma","topup",12,9,TRUE
+318,"Soluble transferrin receptor (sTfr)","Serum/plasma","topup",1,1,TRUE
+1538,"Thrombocytes","Whole Blood","topup",8,7,TRUE
+1065,"Thyroid stimulating hormone (TSH)","Serum/plasma","topup",7,7,TRUE
+940,"Thyroxine - free (FT4)","Serum/plasma","topup",5,5,TRUE
+694,"Thyroxine - total (T4)","Serum/plasma","topup",5,5,TRUE
+1632,"Transferrin","Serum/plasma","topup",2,1,TRUE
+976,"Triglycerides","Serum/plasma","topup",42,14,TRUE
+703,"Triiodothyronine - free (FT3)","Serum/plasma","topup",4,4,TRUE
+1639,"Urate","Serum/plasma","topup",16,12,TRUE
+1514,"Urea","Serum/plasma","topup",14,10,TRUE
+994,"g-glutamyl transferase activity","Serum/plasma","topup",6,6,TRUE

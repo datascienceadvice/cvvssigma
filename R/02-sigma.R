@@ -72,6 +72,19 @@ w <- w %>%
     cvg_hi = ifelse(is.na(upper.cvg), median.cvg_used, upper.cvg)
   )
 
+# --- исключение аналитов, для которых нет входных оценок --------------------
+# Ферритин исключён из расчёта: база не публикует для него мета-анализ CV_G
+# (в матрице сыворотки CV_G приводит только одно из двух исследований, вошедших
+# в мета-анализ CV_I), а подстановка CV_G = 0 создавала бы крайний случай
+# «требование сигма-метрики строже», работающий в пользу основного вывода, и
+# делала бы этот случай нижней границей приводимых диапазонов. Состав панели
+# при этом сохраняется полностью: см. data/panel_analyte_ids.csv, столбец
+# used_in_analysis.
+EXCLUDED_ANALYTES <- "Ferritin"
+
+w_all <- w
+w <- w %>% filter(!analyte_name %in% EXCLUDED_ANALYTES)
+
 # --- уровни аналитических целей ---------------------------------------------
 levels_tbl <- tibble::tribble(
   ~level,      ~imp_mult, ~bias_mult,
@@ -293,6 +306,7 @@ write.csv(derived, file.path(out_dir, "table1_analytes_derived.csv"),
           row.names = FALSE, fileEncoding = "UTF-8")
 
 # --- перечень идентификаторов панели (для воспроизведения состава) ------------
+# Публикуется полный состав панели, включая аналиты, не вошедшие в расчёт.
 panel_ids <- bv %>%
   select(analyte_id, analyte_name, var_type, number_used, matrix, source) %>%
   pivot_wider(id_cols = c(analyte_id, analyte_name, matrix, source),
@@ -300,7 +314,8 @@ panel_ids <- bv %>%
               values_from = number_used, names_prefix = "number_used_") %>%
   transmute(analyte_id, analyte_name, matrix, provenance = source,
             number_used_cvi = number_used_cvi,
-            number_used_cvg = number_used_cvg) %>%
+            number_used_cvg = number_used_cvg,
+            used_in_analysis = !(analyte_name %in% EXCLUDED_ANALYTES)) %>%
   arrange(provenance, analyte_name)
 
 write.csv(panel_ids, file.path(root, "data", "panel_analyte_ids.csv"),
@@ -325,7 +340,10 @@ main <- req %>% filter(level == "desirable", bias_scenario == "bias=0") %>%
             median_ratio = median(c_req_over_cv_a), .groups = "drop")
 
 # --- отчёт ------------------------------------------------------------------
-cat("Аналитов в панели          :", nrow(w), "\n")
+cat("Аналитов собрано в панель  :", nrow(w_all), "\n")
+cat("Исключено из расчёта       :", nrow(w_all) - nrow(w),
+    "(", paste(setdiff(w_all$analyte_name, w$analyte_name), collapse = ", "), ")\n")
+cat("Аналитов в расчёте         :", nrow(w), "\n")
 cat("  с CVi и CVg              :", sum(!w$cvg_imputed), "\n")
 cat("  с CVi, без CVg (CV_G=0)  :", sum(w$cvg_imputed), "\n")
 cat("Матрицы:\n"); print(table(w$matrix))
