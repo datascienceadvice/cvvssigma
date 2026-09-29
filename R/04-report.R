@@ -11,15 +11,26 @@
 
 suppressPackageStartupMessages({ library(dplyr); library(tidyr); library(ggplot2) })
 
+# --- запись и чтение CSV ------------------------------------------------------
+# Разделитель — точка с запятой. Десятичный разделитель в числах остаётся
+# точкой, но файл с разделителем-запятой некорректно разбирается на колонки в
+# локали, где запятая служит десятичным разделителем.
+write_csv_sc <- function(x, path) {
+  write.table(x, path, sep = ";", row.names = FALSE, col.names = TRUE,
+              quote = TRUE, qmethod = "double", na = "NA", fileEncoding = "UTF-8")
+}
+read_csv_sc <- function(path) {
+  read.csv(path, sep = ";", stringsAsFactors = FALSE, fileEncoding = "UTF-8")
+}
 args_all <- commandArgs(trailingOnly = FALSE)
 here <- dirname(sub("^--file=", "", args_all[grep("^--file=", args_all)]))
 root <- normalizePath(file.path(here, ".."), mustWork = TRUE)
 out_dir <- file.path(root, "out")
 
-spec <- read.csv(file.path(out_dir, "sigma_specs.csv"), stringsAsFactors = FALSE, fileEncoding = "UTF-8")
-req  <- read.csv(file.path(out_dir, "sigma_requirements.csv"), stringsAsFactors = FALSE, fileEncoding = "UTF-8")
-fr   <- read.csv(file.path(out_dir, "qc_false_rejection.csv"), stringsAsFactors = FALSE, fileEncoding = "UTF-8")
-det  <- read.csv(file.path(out_dir, "qc_power.csv"), stringsAsFactors = FALSE, fileEncoding = "UTF-8")
+spec <- read_csv_sc(file.path(out_dir, "sigma_specs.csv"))
+req  <- read_csv_sc(file.path(out_dir, "sigma_requirements.csv"))
+fr   <- read_csv_sc(file.path(out_dir, "qc_false_rejection.csv"))
+det  <- read_csv_sc(file.path(out_dir, "qc_power.csv"))
 
 K_COVERAGE <- 1.65
 LEVELS <- c("optimal", "desirable", "minimum")
@@ -42,8 +53,7 @@ t1 <- t1 %>% left_join(r0, by = "analyte_name") %>%
   mutate(across(starts_with("cv_required"), ~ round(.x, 3)),
          across(c(cvi, cvg, cv_a_allow, bias_allow, tea, rel_cvg), ~ round(.x, 3)))
 
-write.csv(t1, file.path(out_dir, "table1_analytes_desirable.csv"),
-          row.names = FALSE, fileEncoding = "UTF-8")
+write_csv_sc(t1, file.path(out_dir, "table1_analytes_desirable.csv"))
 
 # --- Таблица 2: соотношение требований сигмы и целей по биологической вариации
 t2 <- req %>%
@@ -64,8 +74,7 @@ t2 <- req %>%
             .groups = "drop") %>%
   mutate(across(where(is.numeric), ~ round(.x, 4)))
 
-write.csv(t2, file.path(out_dir, "table2_requirement_vs_bv.csv"),
-          row.names = FALSE, fileEncoding = "UTF-8")
+write_csv_sc(t2, file.path(out_dir, "table2_requirement_vs_bv.csv"))
 
 # --- Таблица S1: операционные характеристики схем контроля -------------------
 # arl_mc — оценка ARL по Монте-Карло, устойчивая к цензурированию; arl_over_pfr —
@@ -90,8 +99,7 @@ t3 <- fr %>%
     censored_frac = round(censored_frac, 6)
   )
 
-write.csv(t3, file.path(out_dir, "table_s1_qc_operating_characteristics.csv"),
-          row.names = FALSE, fileEncoding = "UTF-8")
+write_csv_sc(t3, file.path(out_dir, "table_s1_qc_operating_characteristics.csv"))
 
 # --- Таблица S5: зависимость требований от уровня строгости -------------------
 t5 <- req %>%
@@ -106,8 +114,7 @@ t5 <- req %>%
   arrange(match(level, c("optimal", "desirable", "minimum")), sigma_target) %>%
   mutate(across(where(is.numeric), ~ round(.x, 4)))
 
-write.csv(t5, file.path(out_dir, "table_s5_level_strictness.csv"),
-          row.names = FALSE, fileEncoding = "UTF-8")
+write_csv_sc(t5, file.path(out_dir, "table_s5_level_strictness.csv"))
 
 # --- Таблица S6: влияние начала наблюдения на ARL ----------------------------
 t6 <- fr %>%
@@ -121,8 +128,7 @@ t6 <- fr %>%
             n_chains_warm = n_chains_warm,
             warm_censored_frac = round(warm_censored_frac, 6))
 
-write.csv(t6, file.path(out_dir, "table_s6_arl_start.csv"),
-          row.names = FALSE, fileEncoding = "UTF-8")
+write_csv_sc(t6, file.path(out_dir, "table_s6_arl_start.csv"))
 
 # устаревшие артефакты (переименованные рисунки предыдущих версий)
 for (f in c("table3_qc_operating_characteristics.csv", "fig3_qc_power.png",

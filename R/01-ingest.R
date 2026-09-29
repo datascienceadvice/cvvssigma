@@ -11,6 +11,17 @@ suppressPackageStartupMessages({
 })
 
 # --- пути -------------------------------------------------------------------
+# --- запись и чтение CSV ------------------------------------------------------
+# Разделитель — точка с запятой. Десятичный разделитель в числах остаётся
+# точкой, но файл с разделителем-запятой некорректно разбирается на колонки в
+# локали, где запятая служит десятичным разделителем.
+write_csv_sc <- function(x, path) {
+  write.table(x, path, sep = ";", row.names = FALSE, col.names = TRUE,
+              quote = TRUE, qmethod = "double", na = "NA", fileEncoding = "UTF-8")
+}
+read_csv_sc <- function(path) {
+  read.csv(path, sep = ";", stringsAsFactors = FALSE, fileEncoding = "UTF-8")
+}
 args_all <- commandArgs(trailingOnly = FALSE)
 here <- dirname(sub("^--file=", "", args_all[grep("^--file=", args_all)]))
 root <- normalizePath(file.path(here, ".."), mustWork = TRUE)
@@ -126,7 +137,7 @@ bv <- bv[!duplicated(bv[, c("analyte_id", "var_type")]), ]
 bv <- bv[order(bv$analyte_name, bv$var_type), ]
 rownames(bv) <- NULL
 
-write.csv(bv, file.path(out_dir, "bv_meta.csv"), row.names = FALSE, fileEncoding = "UTF-8")
+write_csv_sc(bv, file.path(out_dir, "bv_meta.csv"))
 
 # --- отчёт ------------------------------------------------------------------
 wide <- reshape(bv[, c("analyte_id", "analyte_name", "var_type", "median", "number_used")],

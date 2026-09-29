@@ -242,6 +242,16 @@ Generated locally only, and therefore absent from the clone (see
 `out/sigma_requirements.csv`, `out/table1_analytes_desirable.csv`,
 `out/worked_example.csv`, `out/article_tables.md`.
 
+### File conventions
+
+Every CSV file written by the pipeline uses a **semicolon (`;`) as the field
+separator**; the decimal separator inside numbers remains a dot. This keeps the columns
+intact when the file is opened in a locale that reads a comma as the decimal mark. The
+pipeline reads its own CSV files back with the same convention, so `R/run-all.R` is
+self-consistent. The manuscript tables in `out/article_tables.md` and
+`out/supplementary_tables.md` are Markdown (pipe-separated) and use a comma as the decimal
+separator, matching the Russian text of the article.
+
 ---
 
 ## Licence

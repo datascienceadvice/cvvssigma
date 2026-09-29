@@ -13,24 +13,35 @@ suppressPackageStartupMessages({
   library(jsonlite); library(dplyr); library(tidyr); library(ggplot2)
 })
 
+# --- запись и чтение CSV ------------------------------------------------------
+# Разделитель — точка с запятой. Десятичный разделитель в числах остаётся
+# точкой, но файл с разделителем-запятой некорректно разбирается на колонки в
+# локали, где запятая служит десятичным разделителем.
+write_csv_sc <- function(x, path) {
+  write.table(x, path, sep = ";", row.names = FALSE, col.names = TRUE,
+              quote = TRUE, qmethod = "double", na = "NA", fileEncoding = "UTF-8")
+}
+read_csv_sc <- function(path) {
+  read.csv(path, sep = ";", stringsAsFactors = FALSE, fileEncoding = "UTF-8")
+}
 args_all <- commandArgs(trailingOnly = FALSE)
 here <- dirname(sub("^--file=", "", args_all[grep("^--file=", args_all)]))
 root <- normalizePath(file.path(here, ".."), mustWork = TRUE)
 out_dir <- file.path(root, "out")
 
-spec  <- read.csv(file.path(out_dir, "sigma_specs.csv"), stringsAsFactors = FALSE, fileEncoding = "UTF-8")
-req   <- read.csv(file.path(out_dir, "sigma_requirements.csv"), stringsAsFactors = FALSE, fileEncoding = "UTF-8")
-t2    <- read.csv(file.path(out_dir, "table2_requirement_vs_bv.csv"), stringsAsFactors = FALSE, fileEncoding = "UTF-8")
-s1    <- read.csv(file.path(out_dir, "table_s1_qc_operating_characteristics.csv"), stringsAsFactors = FALSE, fileEncoding = "UTF-8")
-s2    <- read.csv(file.path(out_dir, "table_s2_threshold_analytes.csv"), stringsAsFactors = FALSE, fileEncoding = "UTF-8")
-ks    <- read.csv(file.path(out_dir, "k_sensitivity.csv"), stringsAsFactors = FALSE, fileEncoding = "UTF-8")
-s5    <- read.csv(file.path(out_dir, "table_s5_level_strictness.csv"), stringsAsFactors = FALSE, fileEncoding = "UTF-8")
-s6    <- read.csv(file.path(out_dir, "table_s6_arl_start.csv"), stringsAsFactors = FALSE, fileEncoding = "UTF-8")
-s7    <- read.csv(file.path(out_dir, "table_s7_threshold_sensitivity.csv"), stringsAsFactors = FALSE, fileEncoding = "UTF-8")
-est   <- read.csv(file.path(out_dir, "estimator_comparison.csv"), stringsAsFactors = FALSE, fileEncoding = "UTF-8")
-work  <- read.csv(file.path(out_dir, "worked_example.csv"), stringsAsFactors = FALSE, fileEncoding = "UTF-8")
-det   <- read.csv(file.path(out_dir, "qc_power.csv"), stringsAsFactors = FALSE, fileEncoding = "UTF-8")
-fr    <- read.csv(file.path(out_dir, "qc_false_rejection.csv"), stringsAsFactors = FALSE, fileEncoding = "UTF-8")
+spec  <- read_csv_sc(file.path(out_dir, "sigma_specs.csv"))
+req   <- read_csv_sc(file.path(out_dir, "sigma_requirements.csv"))
+t2    <- read_csv_sc(file.path(out_dir, "table2_requirement_vs_bv.csv"))
+s1    <- read_csv_sc(file.path(out_dir, "table_s1_qc_operating_characteristics.csv"))
+s2    <- read_csv_sc(file.path(out_dir, "table_s2_threshold_analytes.csv"))
+ks    <- read_csv_sc(file.path(out_dir, "k_sensitivity.csv"))
+s5    <- read_csv_sc(file.path(out_dir, "table_s5_level_strictness.csv"))
+s6    <- read_csv_sc(file.path(out_dir, "table_s6_arl_start.csv"))
+s7    <- read_csv_sc(file.path(out_dir, "table_s7_threshold_sensitivity.csv"))
+est   <- read_csv_sc(file.path(out_dir, "estimator_comparison.csv"))
+work  <- read_csv_sc(file.path(out_dir, "worked_example.csv"))
+det   <- read_csv_sc(file.path(out_dir, "qc_power.csv"))
+fr    <- read_csv_sc(file.path(out_dir, "qc_false_rejection.csv"))
 
 K_COVERAGE <- 1.65
 

@@ -51,6 +51,17 @@
 
 suppressPackageStartupMessages({ library(dplyr); library(tidyr) })
 
+# --- запись и чтение CSV ------------------------------------------------------
+# Разделитель — точка с запятой. Десятичный разделитель в числах остаётся
+# точкой, но файл с разделителем-запятой некорректно разбирается на колонки в
+# локали, где запятая служит десятичным разделителем.
+write_csv_sc <- function(x, path) {
+  write.table(x, path, sep = ";", row.names = FALSE, col.names = TRUE,
+              quote = TRUE, qmethod = "double", na = "NA", fileEncoding = "UTF-8")
+}
+read_csv_sc <- function(path) {
+  read.csv(path, sep = ";", stringsAsFactors = FALSE, fileEncoding = "UTF-8")
+}
 args_all <- commandArgs(trailingOnly = FALSE)
 here <- dirname(sub("^--file=", "", args_all[grep("^--file=", args_all)]))
 root <- normalizePath(file.path(here, ".."), mustWork = TRUE)
@@ -353,10 +364,9 @@ est_cmp <- fr %>%
             legacy_over_stationary = legacy_p / p_per_run,
             legacy_over_exact = legacy_p / exact_p_per_run)
 
-write.csv(fr,  file.path(out_dir, "qc_false_rejection.csv"), row.names = FALSE, fileEncoding = "UTF-8")
-write.csv(det, file.path(out_dir, "qc_power.csv"), row.names = FALSE, fileEncoding = "UTF-8")
-write.csv(est_cmp, file.path(out_dir, "estimator_comparison.csv"),
-          row.names = FALSE, fileEncoding = "UTF-8")
+write_csv_sc(fr,  file.path(out_dir, "qc_false_rejection.csv"))
+write_csv_sc(det, file.path(out_dir, "qc_power.csv"))
+write_csv_sc(est_cmp, file.path(out_dir, "estimator_comparison.csv"))
 saveRDS(list(false_rejection = fr, detection = det, arl = arls, estimator = est_cmp,
              params = list(seed = SEED, n_rep_fr = N_REP_FR, runs_fr = RUNS_FR,
                            burn_in = BURN_IN, n_rep_det = N_REP_DET,

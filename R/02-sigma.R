@@ -39,12 +39,23 @@ suppressPackageStartupMessages({
   library(tidyr)
 })
 
+# --- запись и чтение CSV ------------------------------------------------------
+# Разделитель — точка с запятой. Десятичный разделитель в числах остаётся
+# точкой, но файл с разделителем-запятой некорректно разбирается на колонки в
+# локали, где запятая служит десятичным разделителем.
+write_csv_sc <- function(x, path) {
+  write.table(x, path, sep = ";", row.names = FALSE, col.names = TRUE,
+              quote = TRUE, qmethod = "double", na = "NA", fileEncoding = "UTF-8")
+}
+read_csv_sc <- function(path) {
+  read.csv(path, sep = ";", stringsAsFactors = FALSE, fileEncoding = "UTF-8")
+}
 args_all <- commandArgs(trailingOnly = FALSE)
 here <- dirname(sub("^--file=", "", args_all[grep("^--file=", args_all)]))
 root <- normalizePath(file.path(here, ".."), mustWork = TRUE)
 out_dir <- file.path(root, "out")
 
-bv <- read.csv(file.path(out_dir, "bv_meta.csv"), stringsAsFactors = FALSE, fileEncoding = "UTF-8")
+bv <- read_csv_sc(file.path(out_dir, "bv_meta.csv"))
 
 # --- из длинной таблицы в широкую: одна строка на аналит --------------------
 w <- bv %>%
@@ -147,8 +158,8 @@ req <- bind_rows(req, req_real) %>%
   ) %>%
   arrange(analyte_name, level, bias_scenario, sigma_target)
 
-write.csv(spec, file.path(out_dir, "sigma_specs.csv"), row.names = FALSE, fileEncoding = "UTF-8")
-write.csv(req,  file.path(out_dir, "sigma_requirements.csv"), row.names = FALSE, fileEncoding = "UTF-8")
+write_csv_sc(spec, file.path(out_dir, "sigma_specs.csv"))
+write_csv_sc(req,  file.path(out_dir, "sigma_requirements.csv"))
 
 # --- контроль замкнутых форм -------------------------------------------------
 chk_real <- req %>%
@@ -200,8 +211,7 @@ k_sens_summary <- k_sens %>%
   arrange(k, bias_scenario, sigma_target) %>%
   mutate(across(where(is.numeric), ~ round(.x, 4)))
 
-write.csv(k_sens_summary, file.path(out_dir, "k_sensitivity.csv"),
-          row.names = FALSE, fileEncoding = "UTF-8")
+write_csv_sc(k_sens_summary, file.path(out_dir, "k_sensitivity.csv"))
 
 # --- аналиты, не затронутые расхождением (пороговая логика) -----------------
 # Публикуются только производные величины: отношение CV_G/CV_I и отношение
@@ -220,8 +230,7 @@ s2 <- bind_rows(lapply(SIGMA_TARGETS, function(S) {
               ratio_cv_a = round(ratio_cv_a, 3))
 }))
 
-write.csv(s2, file.path(out_dir, "table_s2_threshold_analytes.csv"),
-          row.names = FALSE, fileEncoding = "UTF-8")
+write_csv_sc(s2, file.path(out_dir, "table_s2_threshold_analytes.csv"))
 
 # --- S7: устойчивость пороговых классификаций к интервалам входных оценок ----
 # База EFLM приводит для каждой оценки не только медиану, но и интервал (lower/upper).
@@ -265,8 +274,7 @@ s7 <- bind_rows(lapply(SIGMA_TARGETS, function(S) {
   )
 }))
 
-write.csv(s7, file.path(out_dir, "table_s7_threshold_sensitivity.csv"),
-          row.names = FALSE, fileEncoding = "UTF-8")
+write_csv_sc(s7, file.path(out_dir, "table_s7_threshold_sensitivity.csv"))
 
 # --- публикуемый производный перечень по всем аналитам ------------------------
 # Сырые CV_I и CV_G не публикуются (условия использования базы EFLM); приводятся
@@ -302,8 +310,7 @@ derived <- req %>%
          number_used_cvi, number_used_cvg, cvg_imputed) %>%
   arrange(analyte_name)
 
-write.csv(derived, file.path(out_dir, "table1_analytes_derived.csv"),
-          row.names = FALSE, fileEncoding = "UTF-8")
+write_csv_sc(derived, file.path(out_dir, "table1_analytes_derived.csv"))
 
 # --- перечень идентификаторов панели (для воспроизведения состава) ------------
 # Публикуется полный состав панели, включая аналиты, не вошедшие в расчёт.
@@ -318,8 +325,7 @@ panel_ids <- bv %>%
             used_in_analysis = !(analyte_name %in% EXCLUDED_ANALYTES)) %>%
   arrange(provenance, analyte_name)
 
-write.csv(panel_ids, file.path(root, "data", "panel_analyte_ids.csv"),
-          row.names = FALSE, fileEncoding = "UTF-8")
+write_csv_sc(panel_ids, file.path(root, "data", "panel_analyte_ids.csv"))
 
 # --- рабочий пример численной проверки (для текста статьи) -------------------
 worked <- spec %>%
@@ -329,8 +335,7 @@ worked <- spec %>%
             ratio_bias0_sigma6 = (K_COVERAGE + 0.5 * rel_cvg) / 6,
             ratio_biasallow_sigma6 = K_COVERAGE / 6)
 
-write.csv(worked, file.path(out_dir, "worked_example.csv"),
-          row.names = FALSE, fileEncoding = "UTF-8")
+write_csv_sc(worked, file.path(out_dir, "worked_example.csv"))
 
 # --- контроль регрессии основного расчёта (k = 1.65) -------------------------
 reg <- k_sens_summary %>% filter(k == K_COVERAGE, bias_scenario == "bias=0")

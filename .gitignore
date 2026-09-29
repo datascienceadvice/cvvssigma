@@ -34,5 +34,6 @@ out/article_tables.md
 .Rproj.user/
 *.log
 ~$*.docx
+~*.tmp
 Thumbs.db
 .DS_Store
