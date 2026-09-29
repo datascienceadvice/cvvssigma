@@ -6,7 +6,12 @@
 # Результат: out/article_tables.md, out/supplementary_tables.md,
 #            out/article_numbers.txt
 
-suppressPackageStartupMessages({ library(dplyr); library(tidyr) })
+# Пакеты загружаются явно, чтобы out/session_info.txt не зависел от того, запущен
+# скрипт отдельно или через run-all.R: в файле должны быть перечислены все
+# зависимости конвейера.
+suppressPackageStartupMessages({
+  library(jsonlite); library(dplyr); library(tidyr); library(ggplot2)
+})
 
 args_all <- commandArgs(trailingOnly = FALSE)
 here <- dirname(sub("^--file=", "", args_all[grep("^--file=", args_all)]))
