@@ -78,6 +78,8 @@ Formulas, assumptions and the full methodological rationale are in
 │   │                            robustness to input intervals, derived per-analyte table
 │   ├── 03-power.R               Monte Carlo: false rejection, ARL, shift detection
 │   ├── 04-report.R              summary tables (CSV) and figures (PNG)
+│   ├── 041-report.R             optional figure restyling for local use; NOT part of
+│   │                            run-all.R (overwrites the out/ figures and a few CSVs)
 │   └── 05-tables-article.R      manuscript-ready tables and the key-numbers digest
 ├── data/
 │   ├── panel_analyte_ids.csv    panel composition: analyte ids, matrix, provenance
